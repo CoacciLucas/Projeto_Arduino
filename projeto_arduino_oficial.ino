@@ -21,7 +21,7 @@ SoftwareSerial sim(5, 6); // pinos rx/tx
 byte mac[] = {
   0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED
 };
-IPAddress ip(10, 31, 5, 5); // ip para servidor local
+IPAddress ip(x, x, x, x); // ip para servidor local
 
 // Inicializa a biblioteca Ethernet Server
 // com o IP e porta que você quiser usar
