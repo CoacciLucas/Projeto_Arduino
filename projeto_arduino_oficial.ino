@@ -33,7 +33,7 @@ byte MaxTemperature = 29;
 byte MaxHumidity = 55;
 byte MaxGround_Humidity = 50;
 byte MaxSmoke = 40;
-char numbers[3][15] = {"+5531994693525", "+5531983672051", "+5531993891407"};
+char numbers[3][15] = {"+xxxxxxxxxxxxx", "+xxxxxxxxxxxxx", "+xxxxxxxxxxxxx"};
 String Data_SMS;
 String mensagem;
 unsigned long delay1 = 3600000;
@@ -218,7 +218,8 @@ void loop() {
           client.print(F("        <thead>"));
           client.print(F("            <tr >"));
           client.print(F("                <th></th>"));
-          client.print(F("                <th>Relatório sala fria SRMG</th>"));
+          client.print(F("                <th>Relatório sala fria"));
+          client.print(F(Ethernet.localIP() + "             </th>"));
           client.print(F("                <th></th>"));
           client.print(F("            </tr>"));
           client.print(F("            <tr>"));
