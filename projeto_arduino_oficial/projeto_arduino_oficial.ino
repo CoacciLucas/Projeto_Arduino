@@ -30,10 +30,10 @@ EthernetServer server(80);
 
 char Received_SMS;
 byte MaxTemperature = 29;
-byte MaxHumidity = 55;
+byte MaxHumidity = 70;
 byte MaxGround_Humidity = 50;
 byte MaxSmoke = 40;
-char numbers[3][15] = {"+xxxxxxxxxxxxx", "+xxxxxxxxxxxxx", "+xxxxxxxxxxxxx"};
+char numbers[2][15] = {"+xxxxxxxxxxxxx","+xxxxxxxxxxxxx"};
 String Data_SMS;
 String mensagem;
 unsigned long delay1 = 3600000;
@@ -98,8 +98,6 @@ void loop() {
   sensors = getSensors(); // recebe o valor dos sensores
   String RSMS;
 
-  String Alerta = "ANORMALIDADE DETECTADA!";
-
   if (millis() - delay2 >= 86400000) { // a cada 24 horas reinicia o arduino
     funcReset();
   } else if (millis() - delay3 >= 300000) { // a cada 5 minutos restabelece conexão com o SIM800L
@@ -115,7 +113,7 @@ void loop() {
 
 
   if (sensors->ground_humidity > MaxGround_Humidity || sensors->temperature > MaxTemperature || sensors->humidity > MaxHumidity || sensors->smoke > MaxSmoke) { // verifica se há alguma anormalidade em qualquer 1 dos 3 sensores
-    if ((millis() - delay1) > 3600000) { // após notificar uma vez, ele demora 1 hora para notificar novamente.
+    if ((millis() - delay1) > 10800000) { // após notificar uma vez, ele demora 3 horas para notificar novamente.
       Serial.println("ANORMALIDADE NOS SENSORES!!");
       sensors = getSensors();
       //Data_SMS = "ANORMALIDADE NOS SENSORES!"; // Define a mensagem do alerta a ser enviado
@@ -126,7 +124,7 @@ void loop() {
       // Send_Data(number); //envia a mensagem designada à variável Data_SMS
       //delay(3000);
       Data_SMS = "ANORMALIDADE NOS SENSORES!\nUmidade Solo (Max: 50%): " + String(sensors->ground_humidity, 1) +
-                 "%" + "\nTemp (Max:29C): " + String(sensors->temperature, 1) + "C" + "\nUmidade Ar(Max:55%): " + String(sensors->humidity, 1) +
+                 "%" + "\nTemp (Max:29C): " + String(sensors->temperature, 1) + "C" + "\nUmidade Ar(Max:70%): " + String(sensors->humidity, 1) +
                  "%" + "\nFumaca(Max:40%): " + String(sensors->smoke, 1) + "%";
       for (int i = 0; i < 2 ; i++) {
         Send_Data(numbers[i]);
@@ -168,7 +166,7 @@ void loop() {
     Serial.print(sensors->smoke);
     Serial.print(F("%"));
     Data_SMS = "Umidade Solo (Max: 50%): " + String(sensors->ground_humidity, 1) +
-               "%" + "\nTemp (Max:29C): " + String(sensors->temperature, 1) + "C" + "\nUmidade Ar(Max:55%): " + String(sensors->humidity, 1) +
+               "%" + "\nTemp (Max:29C): " + String(sensors->temperature, 1) + "C" + "\nUmidade Ar(Max:70%): " + String(sensors->humidity, 1) +
                "%" + "\nFumaca(Max:40%): " + String(sensors->smoke, 1) + "%";
 
     Send_Data(send_number);
@@ -199,7 +197,7 @@ void loop() {
           client.println("HTTP/1.1 200 OK");
           client.println("Content-Type: text/html");
           client.println("Connection: close");  // the connection will be closed after completion of the response
-          client.println("Refresh: 5");  // refresh the page automatically every 5 sec
+          client.println("Refresh: 60");  // refresh the page automatically every 5 sec
           client.println();
           client.println(F("<!DOCTYPE html>"));
           client.println(F("<html lang='en'>"));
@@ -250,9 +248,9 @@ void loop() {
           client.print(sensors->humidity);
           client.print("%");
           client.print(F("</td>"));
-          if (sensors->humidity > 60) {
+          if (sensors->humidity > 75) {
             client.print(F("                <td style='color:red'>CRÍTICA</td>"));
-          } else if (sensors->humidity > 55) {
+          } else if (sensors->humidity > 70) {
             client.print(F("                <td style='color:orange'>ANORMAL</td>"));
           } else {
             client.print(F("                <td>Normal</td>"));
