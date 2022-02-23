@@ -21,8 +21,7 @@ SoftwareSerial sim(5, 6); // pinos rx/tx
 byte mac[] = {
   0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED
 };
-IPAddress ip(x, x, x, x); // ip para servidor local
-
+IPAddress ip(10, 31, 5, 17); // ip para servidor local
 // Inicializa a biblioteca Ethernet Server
 // com o IP e porta que você quiser usar
 // (porta 80 é padrão para HTTP):
@@ -30,10 +29,10 @@ EthernetServer server(80);
 
 char Received_SMS;
 byte MaxTemperature = 29;
-byte MaxHumidity = 55;
+byte MaxHumidity = 85;
 byte MaxGround_Humidity = 50;
 byte MaxSmoke = 40;
-char numbers[3][15] = {"+xxxxxxxxxxxxx", "+xxxxxxxxxxxxx", "+xxxxxxxxxxxxx"};
+char numbers[2][15] = {"+xxxxxxxxxxxxx","+xxxxxxxxxxxxx"};
 String Data_SMS;
 String mensagem;
 unsigned long delay1 = 3600000;
@@ -98,8 +97,6 @@ void loop() {
   sensors = getSensors(); // recebe o valor dos sensores
   String RSMS;
 
-  String Alerta = "ANORMALIDADE DETECTADA!";
-
   if (millis() - delay2 >= 86400000) { // a cada 24 horas reinicia o arduino
     funcReset();
   } else if (millis() - delay3 >= 300000) { // a cada 5 minutos restabelece conexão com o SIM800L
@@ -113,31 +110,31 @@ void loop() {
 
 
 
-
-  if (sensors->ground_humidity > MaxGround_Humidity || sensors->temperature > MaxTemperature || sensors->humidity > MaxHumidity || sensors->smoke > MaxSmoke) { // verifica se há alguma anormalidade em qualquer 1 dos 3 sensores
-    if ((millis() - delay1) > 3600000) { // após notificar uma vez, ele demora 1 hora para notificar novamente.
-      Serial.println("ANORMALIDADE NOS SENSORES!!");
-      sensors = getSensors();
-      //Data_SMS = "ANORMALIDADE NOS SENSORES!"; // Define a mensagem do alerta a ser enviado
-      //for (int i = 0; i < 2; i++) {
-        //Send_Data(numbers[i]);
-      //  delay(1000);
-      //}
-      // Send_Data(number); //envia a mensagem designada à variável Data_SMS
-      //delay(3000);
-      Data_SMS = "ANORMALIDADE NOS SENSORES!\nUmidade Solo (Max: 50%): " + String(sensors->ground_humidity, 1) +
-                 "%" + "\nTemp (Max:29C): " + String(sensors->temperature, 1) + "C" + "\nUmidade Ar(Max:55%): " + String(sensors->humidity, 1) +
-                 "%" + "\nFumaca(Max:40%): " + String(sensors->smoke, 1) + "%";
-      for (int i = 0; i < 2 ; i++) {
-        Send_Data(numbers[i]);
-        delay(3000);
-      }
-      //Send_Data(number); //envia a mensagem designada à variável Data_SMS
-      delay1 = millis();
-      delay(6000);
-      CallPhone();
-    }
-  }
+//
+//  if (sensors->ground_humidity > MaxGround_Humidity || sensors->temperature > MaxTemperature || sensors->humidity > MaxHumidity || sensors->smoke > MaxSmoke) { // verifica se há alguma anormalidade em qualquer 1 dos 3 sensores
+//    if ((millis() - delay1) > 10800000) { // após notificar uma vez, ele demora 3 horas para notificar novamente.
+//      Serial.println("ANORMALIDADE NOS SENSORES!!");
+//      sensors = getSensors();
+//      //Data_SMS = "ANORMALIDADE NOS SENSORES!"; // Define a mensagem do alerta a ser enviado
+//      //for (int i = 0; i < 2; i++) {
+//        //Send_Data(numbers[i]);
+//      //  delay(1000);
+//      //}
+//      // Send_Data(number); //envia a mensagem designada à variável Data_SMS
+//      //delay(3000);
+//      Data_SMS = "ANORMALIDADE NOS SENSORES!\nUmidade Solo (Max: 50%): " + String(sensors->ground_humidity, 1) +
+//                 "%" + "\nTemp (Max:29C): " + String(sensors->temperature, 1) + "C" + "\nUmidade Ar(Max:70%): " + String(sensors->humidity, 1) +
+//                 "%" + "\nFumaca(Max:40%): " + String(sensors->smoke, 1) + "%";
+//      for (int i = 0; i < 2 ; i++) {
+//        Send_Data(numbers[i]);
+//        delay(3000);
+//      }
+//      //Send_Data(number); //envia a mensagem designada à variável Data_SMS
+//      delay1 = millis();
+//      delay(6000);
+//      CallPhone();
+//    }
+//  }
 
   while (sim.available() > 0) { // verifica se há novas mensagens
     Received_SMS = sim.read(); // Designa a mensagem recebida a uma variável
@@ -168,7 +165,7 @@ void loop() {
     Serial.print(sensors->smoke);
     Serial.print(F("%"));
     Data_SMS = "Umidade Solo (Max: 50%): " + String(sensors->ground_humidity, 1) +
-               "%" + "\nTemp (Max:29C): " + String(sensors->temperature, 1) + "C" + "\nUmidade Ar(Max:55%): " + String(sensors->humidity, 1) +
+               "%" + "\nTemp (Max:29C): " + String(sensors->temperature, 1) + "C" + "\nUmidade Ar(Max:70%): " + String(sensors->humidity, 1) +
                "%" + "\nFumaca(Max:40%): " + String(sensors->smoke, 1) + "%";
 
     Send_Data(send_number);
@@ -199,14 +196,14 @@ void loop() {
           client.println("HTTP/1.1 200 OK");
           client.println("Content-Type: text/html");
           client.println("Connection: close");  // the connection will be closed after completion of the response
-          client.println("Refresh: 5");  // refresh the page automatically every 5 sec
+          client.println("Refresh: 60");  // refresh the page automatically every 60 sec
           client.println();
           client.println(F("<!DOCTYPE html>"));
           client.println(F("<html lang='en'>"));
           client.print(F("<head>"));
           client.print(F("    <meta charset='UTF-8'>"));
           client.println(F("<style type=\"text/css\">"));
-          client.println(F(".styled-table {border-collapse: collapse;margin: 25px 0;font-size: 0.9em;font-family: sans-serif;width: 600px;box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);overflow-y: auto;}.styled-table thead tr {background-color: #009879;color: #ffffff;text-align: left;}.styled-table th,.styled-table td {padding: 12px 15px;}.styled-table tbody tr {border-bottom: 1px solid #dddddd;}.styled-table tbody tr:nth-of-type(even) {background-color: #f3f3f3;}.styled-table tbody tr:last-of-type {border-bottom: 2px solid #009879;}.styled-table tbody tr.active-row {font-weight: bold; color: #009879;}@media screen and (max-width:600px) {.styled-table {width: 100vw;margin-right: 10px;}}@media screen and (max-width:376px) {.styled-table {overflow: scroll;overflow: auto;}}@media screen and (max-width:281) {.styled-table {overflow: scroll;overflow: auto; }}"));
+          client.println(F("th{text-align:center;}td{text-align:center;}.styled-table {border-collapse: collapse;margin: 25px 0;font-size: 0.9em;font-family: sans-serif;width: 600px;box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);overflow-y: auto;}.styled-table thead tr {background-color: #009879;color: #ffffff;text-align: left;}.styled-table th,.styled-table td {padding: 12px 15px;}.styled-table tbody tr {border-bottom: 1px solid #dddddd;}.styled-table tbody tr:nth-of-type(even) {background-color: #f3f3f3;}.styled-table tbody tr:last-of-type {border-bottom: 2px solid #009879;}.styled-table tbody tr.active-row {font-weight: bold; color: #009879;}@media screen and (max-width:600px) {.styled-table {width: 100vw;margin-right: 10px;}}@media screen and (max-width:376px) {.styled-table {overflow: scroll;overflow: auto;}}@media screen and (max-width:281) {.styled-table {overflow: scroll;overflow: auto; }}"));
           client.println(F("</style>"));
           client.print(F("    <meta http-equiv='X-UA-Compatible' content='IE=edge'>"));
           client.print(F("    <meta name='viewport' content='width=device-width, initial-scale=1.0'>"));
@@ -217,10 +214,11 @@ void loop() {
           client.print(F("    <table class='styled-table'>"));
           client.print(F("        <thead>"));
           client.print(F("            <tr >"));
-          client.print(F("                <th></th>"));
-          client.print(F("                <th>Relatório sala fria"));
-          client.print(F(Ethernet.localIP() + "             </th>"));
-          client.print(F("                <th></th>"));
+          client.print(F("                <th style='width:35%'></th>"));
+          client.print(F("                <th style='width:30%'>Relatório sala fria "));
+          client.print(ip);
+          client.print("             </th>");
+          client.print(F("                <th style='width:35%'></th>"));
           client.print(F("            </tr>"));
           client.print(F("            <tr>"));
           client.print(F("                <th>Sensor</th>"));
@@ -250,9 +248,9 @@ void loop() {
           client.print(sensors->humidity);
           client.print("%");
           client.print(F("</td>"));
-          if (sensors->humidity > 60) {
+          if (sensors->humidity > 75) {
             client.print(F("                <td style='color:red'>CRÍTICA</td>"));
-          } else if (sensors->humidity > 55) {
+          } else if (sensors->humidity > 70) {
             client.print(F("                <td style='color:orange'>ANORMAL</td>"));
           } else {
             client.print(F("                <td>Normal</td>"));
