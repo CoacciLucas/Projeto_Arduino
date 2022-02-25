@@ -21,7 +21,7 @@ SoftwareSerial sim(5, 6); // pinos rx/tx
 byte mac[] = {
   0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED
 };
-IPAddress ip(10, 31, 5, 17); // ip para servidor local
+IPAddress ip(x, x, x, x); // ip para servidor local
 // Inicializa a biblioteca Ethernet Server
 // com o IP e porta que você quiser usar
 // (porta 80 é padrão para HTTP):
@@ -32,7 +32,7 @@ byte MaxTemperature = 29;
 byte MaxHumidity = 85;
 byte MaxGround_Humidity = 50;
 byte MaxSmoke = 40;
-char numbers[2][15] = {"+xxxxxxxxxxxxx","+xxxxxxxxxxxxx"};
+char numbers[2][15] = {"+xxxxxxxxxxxxx"};
 String Data_SMS;
 String mensagem;
 unsigned long delay1 = 3600000;
@@ -165,7 +165,7 @@ void loop() {
     Serial.print(sensors->smoke);
     Serial.print(F("%"));
     Data_SMS = "Umidade Solo (Max: 50%): " + String(sensors->ground_humidity, 1) +
-               "%" + "\nTemp (Max:29C): " + String(sensors->temperature, 1) + "C" + "\nUmidade Ar(Max:70%): " + String(sensors->humidity, 1) +
+               "%" + "\nTemp (Max:29C): " + String(sensors->temperature, 1) + "C" + "\nUmidade Ar(Max:85%): " + String(sensors->humidity, 1) +
                "%" + "\nFumaca(Max:40%): " + String(sensors->smoke, 1) + "%";
 
     Send_Data(send_number);
@@ -228,7 +228,7 @@ void loop() {
           client.print(F("        </thead>"));
           client.print(F("        <tbody>"));
           client.print(F("            <tr class='active-row'>"));
-          client.print(F("                <td>Temperatura</td>"));
+          client.print(F("                <td>Temperatura (Max 29C)</td>"));
           client.print(F("<td>"));
           client.print(sensors->temperature);
           client.print("ºC");
@@ -243,21 +243,21 @@ void loop() {
 
           client.print(F("            </tr>"));
           client.print(F("            <tr class='active-row'>"));
-          client.print(F("                <td>Umidade do Ar</td>"));
+          client.print(F("                <td>Umidade do Ar (Max 85%)</td>"));
           client.print(F("<td>"));
           client.print(sensors->humidity);
           client.print("%");
           client.print(F("</td>"));
-          if (sensors->humidity > 75) {
+          if (sensors->humidity > 90) {
             client.print(F("                <td style='color:red'>CRÍTICA</td>"));
-          } else if (sensors->humidity > 70) {
+          } else if (sensors->humidity > 85) {
             client.print(F("                <td style='color:orange'>ANORMAL</td>"));
           } else {
             client.print(F("                <td>Normal</td>"));
           }
           client.print(F("            </tr>"));
           client.print(F("            <tr class='active-row'>"));
-          client.print(F("                <td>Umidade do Solo</td>"));
+          client.print(F("                <td>Umidade do Solo (Max 50%)</td>"));
           client.print(F("<td>"));
           client.print(sensors->ground_humidity);
           client.print("%");
@@ -271,7 +271,7 @@ void loop() {
           }
           client.print(F("            </tr>"));
           client.print(F("            <tr class='active-row'>"));
-          client.print(F("                <td>Fumaça</td>"));
+          client.print(F("                <td>Fumaça (Max 40%)</td>"));
           client.print(F("<td>"));
           client.print(sensors->smoke);
           client.print("%");
